@@ -28,4 +28,20 @@ export interface DiscordCommand {
   ): Promise<void>;
 }
 
-export const command = (c: DiscordCommand) => c;
+export type DiscordCommandData = (
+  data: SlashCommandBuilder,
+) => Partial<SlashCommandBuilder>;
+export type DiscordCommandExecutor = (
+  ctx: Context,
+  interaction: ChatInputCommandInteraction,
+) => Promise<void>;
+
+export const command = (
+  data: DiscordCommandData,
+  execute: DiscordCommandExecutor,
+): DiscordCommand => {
+  return {
+    data: data(new SlashCommandBuilder()) as any,
+    execute,
+  };
+};
