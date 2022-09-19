@@ -1,0 +1,34 @@
+{
+  "name": "north",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "dev:watch": "tsc --watch",
+    "dev:start": "node-dev --respawn --no-notify dist/index.js",
+    "dev:db": "docker-compose -f docker-compose.dev.yml up -d",
+    "dev": "pnpm run dev:db && run-p -l dev:watch dev:start",
+    "postinstall": "prisma generate"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.7.15",
+    "@typescript-eslint/eslint-plugin": "^5.36.2",
+    "@typescript-eslint/parser": "^5.36.2",
+    "eslint": "^8.23.0",
+    "eslint-config-prettier": "^8.5.0",
+    "node-dev": "^7.4.3",
+    "npm-run-all": "^4.1.5",
+    "prisma": "^4.3.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.2"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^1.1.0",
+    "@prisma/client": "^4.3.1",
+    "discord.js": "^14.3.0",
+    "dotenv": "^16.0.2",
+    "fast-deep-equal": "^3.1.3"
+  }
+}
