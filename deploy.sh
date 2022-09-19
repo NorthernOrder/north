@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Make sure that DB is running
 docker-compose up -d db
 # Build Bot Container
