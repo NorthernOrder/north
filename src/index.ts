@@ -4,16 +4,16 @@ import {
   Client,
   Collection,
   GatewayIntentBits,
-  RESTPostAPIApplicationCommandsJSONBody,
+  // RESTPostAPIApplicationCommandsJSONBody,
   Routes,
 } from 'discord.js';
 import { REST } from '@discordjs/rest';
-import { join, dirname } from 'node:path';
+import { join /* dirname */ } from 'node:path';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { Context, DiscordCommand, DiscordEvent } from './utils.js';
+import { Context, DiscordCommand, DiscordEvent } from './utils';
 import { existsSync } from 'node:fs';
-// import { fileURLToPath, pathToFileURL } from 'node:url';
-import fastDeepEqual from 'fast-deep-equal';
+import { /* fileURLToPath, */ pathToFileURL } from 'node:url';
+// import fastDeepEqual from 'fast-deep-equal';
 
 // const fileDir = dirname(fileURLToPath(import.meta.url));
 
@@ -28,9 +28,10 @@ async function loadEvents(ctx: Context) {
     if (!(file.endsWith('ts') || file.endsWith('js'))) continue;
 
     const filePath = join(eventsPath, file);
-    const event = require(filePath.slice(0, -3)).default as DiscordEvent;
-    // const eventImport = await import(pathToFileURL(filePath).toString());
-    // const event = eventImport.default as DiscordEvent;
+    // const event = require(filePath.slice(0, -3)).default as DiscordEvent;
+    const eventImport = await import(pathToFileURL(filePath).toString());
+    // const eventImport = await import(filePath);
+    const event = eventImport.default.default as DiscordEvent;
 
     if (event.once) {
       ctx.client.once(event.name, (...args) => event.handler(ctx, ...args));
@@ -53,9 +54,10 @@ async function loadCommands(ctx: Context) {
     if (!(file.endsWith('ts') || file.endsWith('js'))) continue;
 
     const filePath = join(commandsPath, file);
-    const command = require(filePath.slice(0, -3)).default as DiscordCommand;
-    // const commandImport = await import(pathToFileURL(filePath).toString());
-    // const command = commandImport.default as DiscordCommand;
+    // const command = require(filePath.slice(0, -3)).default as DiscordCommand;
+    const commandImport = await import(pathToFileURL(filePath).toString());
+    // const commandImport = await import(filePath);
+    const command = commandImport.default.default as DiscordCommand;
 
     ctx.commands.set(command.data.name, command);
   }

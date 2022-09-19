@@ -1,5 +1,5 @@
 import { BaseInteraction } from 'discord.js';
-import { event } from '../utils.js';
+import { event } from '../utils';
 
 export default event({
   name: 'interactionCreate',
