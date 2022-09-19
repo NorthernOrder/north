@@ -11,4 +11,7 @@ module.exports = {
     node: true,
     es2020: true,
   },
+  rules: {
+    '@typescript-eslint/no-explicit-any': 0,
+  },
 };
