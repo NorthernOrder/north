@@ -6,10 +6,24 @@ import {
   SlashCommandBuilder,
 } from 'discord.js';
 
+export interface PermissionData {
+  id: number;
+  name: string;
+  discord: string;
+}
+
+export enum Permission {
+  Everyone = 1,
+  Staff = 2,
+  Admin = 3,
+  Owner = 4,
+}
+
 export interface Context {
   client: Client;
   prisma: PrismaClient;
   commands: Collection<string, DiscordCommand>;
+  permissions: Collection<number, PermissionData>;
 }
 
 export interface DiscordEvent {
@@ -26,6 +40,7 @@ export interface DiscordCommand {
     ctx: Context,
     interaction: ChatInputCommandInteraction,
   ): Promise<void>;
+  permissions: Permission;
 }
 
 export type DiscordCommandData = (
@@ -39,9 +54,11 @@ export type DiscordCommandExecutor = (
 export const command = (
   data: DiscordCommandData,
   execute: DiscordCommandExecutor,
+  permissions = Permission.Everyone,
 ): DiscordCommand => {
   return {
     data: data(new SlashCommandBuilder()) as any,
     execute,
+    permissions,
   };
 };

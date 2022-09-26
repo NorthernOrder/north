@@ -10,7 +10,7 @@ import {
 import { REST } from '@discordjs/rest';
 import { join /* dirname */ } from 'node:path';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { Context, DiscordCommand, DiscordEvent } from './utils';
+import { Context, DiscordCommand, DiscordEvent, PermissionData } from './utils';
 import { existsSync } from 'node:fs';
 import { /* fileURLToPath, */ pathToFileURL } from 'node:url';
 // import fastDeepEqual from 'fast-deep-equal';
@@ -113,19 +113,39 @@ async function deployCommands(ctx: Context) {
   );
 }
 
+async function loadPermissions(ctx: Context) {
+  console.log('Loading permissions...');
+
+  const permissionsPath = join(__dirname, '..', 'permissions.json');
+
+  if (!existsSync(permissionsPath)) {
+    throw new Error("Couldn't find permission data file!");
+  }
+
+  const permissionsStr = await readFile(permissionsPath, 'utf-8');
+  const permissions = JSON.parse(permissionsStr);
+
+  for (const permission of permissions) {
+    ctx.permissions.set(permission.id, permission);
+  }
+}
+
 const prisma = new PrismaClient();
 
 async function main() {
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
   const commands = new Collection<string, DiscordCommand>();
+  const permissions = new Collection<number, PermissionData>();
 
   const ctx: Context = {
     client,
     prisma,
     commands,
+    permissions,
   };
 
+  await loadPermissions(ctx);
   await loadEvents(ctx);
   await loadCommands(ctx);
   await deployCommands(ctx);
