@@ -4,7 +4,13 @@ import { Client, Collection, GatewayIntentBits, Routes } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { join } from 'node:path';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { Context, DiscordCommand, DiscordEvent, PermissionData } from './utils';
+import {
+  Context,
+  DiscordCommand,
+  DiscordEvent,
+  Permission,
+  PermissionData,
+} from './utils';
 import { existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
@@ -97,21 +103,30 @@ async function deployCommands(ctx: Context) {
   );
 }
 
-async function loadPermissions(ctx: Context) {
-  console.log('Loading permissions...');
+function loadPermissions(ctx: Context) {
+  ctx.permissions.set(Permission.Everyone, {
+    id: Permission.Everyone,
+    name: 'Everyone',
+    discord: env.PERMISSION_EVERYONE,
+  });
 
-  const permissionsPath = join(__dirname, '..', 'permissions.json');
+  ctx.permissions.set(Permission.Staff, {
+    id: Permission.Staff,
+    name: 'Staff',
+    discord: env.PERMISSION_STAFF,
+  });
 
-  if (!existsSync(permissionsPath)) {
-    throw new Error("Couldn't find permission data file!");
-  }
+  ctx.permissions.set(Permission.Admin, {
+    id: Permission.Admin,
+    name: 'Admin',
+    discord: env.PERMISSION_ADMIN,
+  });
 
-  const permissionsStr = await readFile(permissionsPath, 'utf-8');
-  const permissions = JSON.parse(permissionsStr);
-
-  for (const permission of permissions) {
-    ctx.permissions.set(permission.id, permission);
-  }
+  ctx.permissions.set(Permission.Owner, {
+    id: Permission.Owner,
+    name: 'Owner',
+    discord: env.PERMISSION_OWNER,
+  });
 }
 
 const prisma = new PrismaClient();
@@ -129,7 +144,7 @@ async function main() {
     permissions,
   };
 
-  await loadPermissions(ctx);
+  loadPermissions(ctx);
   await loadEvents(ctx);
   await loadCommands(ctx);
   await deployCommands(ctx);
