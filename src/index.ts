@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import { env } from './env';
 import { PrismaClient } from '@prisma/client';
 import {
   Client,
@@ -92,9 +92,9 @@ async function deployCommands(ctx: Context) {
       : 'Commands have changed since last start, deploying commands...',
   );
 
-  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+  const rest = new REST({ version: '10' }).setToken(env.TOKEN);
 
-  await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+  await rest.put(Routes.applicationCommands(env.CLIENT_ID), {
     body: currentCommands,
   });
 
@@ -151,7 +151,7 @@ async function main() {
   await deployCommands(ctx);
 
   console.log('Logging in...');
-  await client.login(process.env.TOKEN);
+  await client.login(env.TOKEN);
 }
 
 main()
