@@ -4,6 +4,8 @@ import {
   Client,
   Collection,
   SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
+  SlashCommandSubcommandsOnlyBuilder,
 } from 'discord.js';
 
 export interface PermissionData {
@@ -45,7 +47,12 @@ export interface DiscordCommand {
 
 export type DiscordCommandData = (
   data: SlashCommandBuilder,
-) => Partial<SlashCommandBuilder>;
+) =>
+  | SlashCommandBuilder
+  | SlashCommandOptionsOnlyBuilder
+  | SlashCommandSubcommandsOnlyBuilder
+  | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
+
 export type DiscordCommandExecutor = (
   ctx: Context,
   interaction: ChatInputCommandInteraction,
