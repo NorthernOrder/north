@@ -1,26 +1,16 @@
 import { env } from './env';
 import { PrismaClient } from '@prisma/client';
-import {
-  Client,
-  Collection,
-  GatewayIntentBits,
-  // RESTPostAPIApplicationCommandsJSONBody,
-  Routes,
-} from 'discord.js';
+import { Client, Collection, GatewayIntentBits, Routes } from 'discord.js';
 import { REST } from '@discordjs/rest';
-import { join /* dirname */ } from 'node:path';
+import { join } from 'node:path';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { Context, DiscordCommand, DiscordEvent, PermissionData } from './utils';
 import { existsSync } from 'node:fs';
-import { /* fileURLToPath, */ pathToFileURL } from 'node:url';
-// import fastDeepEqual from 'fast-deep-equal';
-
-// const fileDir = dirname(fileURLToPath(import.meta.url));
+import { pathToFileURL } from 'node:url';
 
 async function loadEvents(ctx: Context) {
   console.log('Loading events...');
 
-  // const eventsPath = join(fileDir, 'events');
   const eventsPath = join(__dirname, 'events');
   const eventFiles = await readdir(eventsPath);
 
@@ -28,9 +18,7 @@ async function loadEvents(ctx: Context) {
     if (!(file.endsWith('ts') || file.endsWith('js'))) continue;
 
     const filePath = join(eventsPath, file);
-    // const event = require(filePath.slice(0, -3)).default as DiscordEvent;
     const eventImport = await import(pathToFileURL(filePath).toString());
-    // const eventImport = await import(filePath);
     const event = eventImport.default.default as DiscordEvent;
 
     if (event.once) {
@@ -46,7 +34,6 @@ async function loadEvents(ctx: Context) {
 async function loadCommands(ctx: Context) {
   console.log('Loading commands...');
 
-  // const commandsPath = join(fileDir, 'commands');
   const commandsPath = join(__dirname, 'commands');
   const commandFiles = await readdir(commandsPath);
 
@@ -54,9 +41,7 @@ async function loadCommands(ctx: Context) {
     if (!(file.endsWith('ts') || file.endsWith('js'))) continue;
 
     const filePath = join(commandsPath, file);
-    // const command = require(filePath.slice(0, -3)).default as DiscordCommand;
     const commandImport = await import(pathToFileURL(filePath).toString());
-    // const commandImport = await import(filePath);
     const command = commandImport.default.default as DiscordCommand;
 
     ctx.commands.set(command.data.name, command);
@@ -67,7 +52,6 @@ async function loadCommands(ctx: Context) {
 
 async function deployCommands(ctx: Context) {
   let deployedCommandsStr = '';
-  // const deployedCommandsPath = join(fileDir, '..', 'deployedCommands.json');
   const deployedCommandsPath = join(__dirname, '..', 'deployedCommands.json');
 
   if (existsSync(deployedCommandsPath)) {
