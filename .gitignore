@@ -1,5 +1,6 @@
 node_modules/
 dist/
+prisma/main.db
 .env
 .env.postgres
 deployedCommands.json

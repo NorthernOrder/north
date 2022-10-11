@@ -6,13 +6,32 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-model ReactionRole {
-  id        Int    @id @default(autoincrement())
-  messageId String
-  emoji     String
-  roleId    String @unique
+model RoleCategory {
+  id       String             @id
+  name     String             @unique
+  padding  Int                @default(0)
+  order    Int
+  roles    Role[]
+  messages SelfRoleMessages[]
+}
+
+model Role {
+  id          String       @id
+  name        String       @unique
+  description String       @default("")
+  order       Int
+  selfRole    Boolean
+  category    RoleCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String
+}
+
+model SelfRoleMessages {
+  id             String       @id
+  category       RoleCategory @relation(fields: [roleCategoryId], references: [id])
+  roleCategoryId String
+  customId       String       @unique
 }

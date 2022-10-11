@@ -9,6 +9,8 @@ export const schema = z.object({
   PERMISSION_STAFF: z.string(),
   PERMISSION_ADMIN: z.string(),
   PERMISSION_OWNER: z.string(),
+  NO_SORT_ROLE_COUNT: z.string().transform((s) => parseInt(s, 10)),
+  SELF_ROLE_CHANNEL: z.string(),
 });
 
 const formatErrors = (errors: ZodFormattedError<Map<string, string>, string>) =>

@@ -69,3 +69,19 @@ export const command = (
     permissions,
   };
 };
+
+export const snakeCase = (str: string) =>
+  str.toLowerCase().replaceAll(' ', '_');
+export const titleCase = (str: string) =>
+  str
+    .split('_')
+    .map((s) => [s[0]!.toUpperCase(), s.slice(1)].join(''))
+    .join(' ');
+
+export const prettyList = (list: any[]) => {
+  if (list.length === 1) return list[0]!;
+
+  return (
+    list.slice(0, list.length - 1).join(', ') + ' & ' + list[list.length - 1]
+  );
+};

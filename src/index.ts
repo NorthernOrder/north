@@ -1,6 +1,12 @@
 import { env } from './env';
 import { PrismaClient } from '@prisma/client';
-import { Client, Collection, GatewayIntentBits, Routes } from 'discord.js';
+import {
+  ActivityType,
+  Client,
+  Collection,
+  GatewayIntentBits,
+  Routes,
+} from 'discord.js';
 import { REST } from '@discordjs/rest';
 import { join } from 'node:path';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
@@ -132,7 +138,17 @@ function loadPermissions(ctx: Context) {
 const prisma = new PrismaClient();
 
 async function main() {
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildBans,
+      GatewayIntentBits.GuildMessageReactions,
+      GatewayIntentBits.GuildPresences,
+    ],
+  });
 
   const commands = new Collection<string, DiscordCommand>();
   const permissions = new Collection<number, PermissionData>();
@@ -151,6 +167,11 @@ async function main() {
 
   console.log('Logging in...');
   await client.login(env.TOKEN);
+
+  client.user!.setActivity({
+    name: 'v0.4',
+    type: ActivityType.Playing,
+  });
 }
 
 main()
