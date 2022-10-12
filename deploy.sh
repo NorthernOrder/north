@@ -4,8 +4,6 @@ set -e
 
 export NORTH_BOT_VERSION="v0.4"
 
-# Make sure that DB is running
-docker-compose up -d db
 # Build Bot Container
 docker-compose build
 # Stop Bot if it is running
