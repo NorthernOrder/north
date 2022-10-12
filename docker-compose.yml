@@ -1,12 +1,5 @@
 version: '3.8'
 services:
-  db:
-    container_name: north-bot-db
-    image: postgres:14-alpine
-    env_file:
-      - .env.postgres
-    networks:
-      - north-bot
   bot:
     container_name: north-bot
     image: nrth/north-bot:${NORTH_BOT_VERSION:-latest}
@@ -15,11 +8,4 @@ services:
       - NODE_ENV=true
     env_file:
       - .env
-    depends_on:
-      - db
-    networks:
-      - north-bot
 
-networks:
-  north-bot:
-    name: north-bot
