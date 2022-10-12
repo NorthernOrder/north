@@ -4,6 +4,8 @@ services:
     container_name: north-bot
     image: nrth/north-bot:${NORTH_BOT_VERSION:-latest}
     build: .
+    volumes:
+      - ./prisma:/app/prisma
     environment:
       - NODE_ENV=true
     env_file:
