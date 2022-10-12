@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { command, Permission } from '../utils';
 
 export default command(
@@ -5,6 +6,7 @@ export default command(
     data
       .setName('delete')
       .setDescription('Delete messages')
+      .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
       .addNumberOption((option) =>
         option.setName('amount').setDescription('Amount of messages to delete'),
       ),
