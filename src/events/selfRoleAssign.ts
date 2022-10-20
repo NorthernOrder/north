@@ -1,10 +1,12 @@
 import { Role, RoleCategory } from '@prisma/client';
 import { BaseInteraction, GuildMember } from 'discord.js';
-import { event, prettyList, snakeCase } from '../utils';
+import { Context, event, prettyList, snakeCase } from '../utils';
+
+type RoleCategoryWithRoles = RoleCategory & { roles: Role[] };
 
 const hasAdditionalRolesInCategory = (
   member: GuildMember,
-  roleCategory: RoleCategory & { roles: Role[] },
+  roleCategory: RoleCategoryWithRoles,
 ) => {
   for (const additionalRole of roleCategory!.roles) {
     if (member.roles.cache.has(additionalRole.id)) {
@@ -13,6 +15,43 @@ const hasAdditionalRolesInCategory = (
   }
 
   return false;
+};
+
+const updateSelfRoles = async (
+  member: GuildMember,
+  roleCategory: RoleCategoryWithRoles,
+  selectedRoles: Role[],
+  unselectedRoles: Role[],
+) => {
+  const removed = new Array<string>();
+  const added = new Array<string>();
+
+  for (const role of unselectedRoles) {
+    if (!member.roles.cache.has(role.id)) continue;
+
+    await member.roles.remove(role.id);
+    removed.push(role.name);
+  }
+
+  for (const role of selectedRoles) {
+    if (member.roles.cache.has(role.id)) continue;
+
+    await member.roles.add(role.id);
+    added.push(role.name);
+  }
+
+  if (!hasAdditionalRolesInCategory(member, roleCategory)) {
+    await member.roles.remove(roleCategory.id);
+  }
+
+  if (
+    hasAdditionalRolesInCategory(member, roleCategory) &&
+    !member.roles.cache.has(roleCategory.id)
+  ) {
+    await member.roles.add(roleCategory.id);
+  }
+
+  return { removed, added };
 };
 
 export default event({
@@ -32,41 +71,38 @@ export default event({
 
     if (!roleCategory) return;
 
-    const includedRoles = roleCategory.roles.filter((role) =>
+    const selectedRoles = roleCategory.roles.filter((role) =>
       interaction.values.includes(snakeCase(role.name)),
     );
+    const unselectedRoles = roleCategory.roles.filter(
+      (role) => !selectedRoles.includes(role),
+    );
 
-    const changed = new Array<string>();
     const member = interaction.member as GuildMember;
 
-    if (interaction.values.length === 0) {
-      for (const role of roleCategory.roles) {
-        if (member.roles.cache.has(role.id)) {
-          await member.roles.remove(role.id);
-          changed.push(role.name);
-        }
-      }
+    const { removed, added } = await updateSelfRoles(
+      member,
+      roleCategory,
+      selectedRoles,
+      unselectedRoles,
+    );
 
-      if (!hasAdditionalRolesInCategory(member, roleCategory)) {
-        await member.roles.remove(roleCategory.id);
-      }
-    } else {
-      if (!member.roles.cache.has(roleCategory.id)) {
-        await member.roles.add(roleCategory.id);
-      }
+    const content = [];
 
-      for (const role of includedRoles) {
-        await member.roles.add(role.id);
-        changed.push(role.name);
-      }
+    if (removed.length > 0) {
+      content.push(`Removed ${prettyList(removed)}`);
     }
 
-    const prettyRoles = prettyList(changed);
+    if (added.length > 0) {
+      content.push(`Added ${prettyList(added)}`);
+    }
+
+    if (content.length === 0) {
+      content.push('Nothing changed');
+    }
+
     await interaction.reply({
-      content:
-        interaction.values.length === 0
-          ? `Removed ${prettyRoles}.`
-          : `Added ${prettyRoles}.`,
+      content: content.join('\n'),
       ephemeral: true,
     });
   },
