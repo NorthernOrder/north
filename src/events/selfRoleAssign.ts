@@ -1,6 +1,12 @@
 import { Role, RoleCategory } from '@prisma/client';
-import { BaseInteraction, GuildMember } from 'discord.js';
-import { Context, event, prettyList, snakeCase } from '../utils';
+import { BaseInteraction, EmbedBuilder, GuildMember } from 'discord.js';
+import {
+  Context,
+  event,
+  prettyList,
+  roleIdToRoleMention,
+  snakeCase,
+} from '../utils';
 
 type RoleCategoryWithRoles = RoleCategory & { roles: Role[] };
 
@@ -30,14 +36,14 @@ const updateSelfRoles = async (
     if (!member.roles.cache.has(role.id)) continue;
 
     await member.roles.remove(role.id);
-    removed.push(role.name);
+    removed.push(role.id);
   }
 
   for (const role of selectedRoles) {
     if (member.roles.cache.has(role.id)) continue;
 
     await member.roles.add(role.id);
-    added.push(role.name);
+    added.push(role.id);
   }
 
   if (!hasAdditionalRolesInCategory(member, roleCategory)) {
@@ -90,19 +96,24 @@ export default event({
     const content = [];
 
     if (removed.length > 0) {
-      content.push(`Removed ${prettyList(removed)}`);
+      content.push(`Removed ${prettyList(removed.map(roleIdToRoleMention))}`);
     }
 
     if (added.length > 0) {
-      content.push(`Added ${prettyList(added)}`);
+      content.push(`Added ${prettyList(added.map(roleIdToRoleMention))}`);
     }
 
     if (content.length === 0) {
       content.push('Nothing changed');
     }
 
+    const embed = new EmbedBuilder();
+
+    embed.setTitle('Role Update');
+    embed.setDescription(content.join('\n'));
+
     await interaction.reply({
-      content: content.join('\n'),
+      embeds: [embed],
       ephemeral: true,
     });
   },

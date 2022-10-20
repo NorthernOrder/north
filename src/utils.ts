@@ -96,3 +96,5 @@ export const prettyList = (list: any[]) => {
     list.slice(0, list.length - 1).join(', ') + ' & ' + list[list.length - 1]
   );
 };
+
+export const roleIdToRoleMention = (id: string) => `<@&${id}>`;
