@@ -5,9 +5,9 @@ services:
     image: nrth/north-bot:${NORTH_BOT_VERSION:-latest}
     build: .
     volumes:
-      - ./prisma:/app/prisma
+      - ./data:/app/data
     environment:
       - NODE_ENV=true
     env_file:
-      - .env
+      - .env.docker
 

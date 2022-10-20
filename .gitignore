@@ -1,5 +1,6 @@
 node_modules/
 dist/
-prisma/main.db
+.pnpm-store/
+data/
 .env
-deployedCommands.json
+.env.docker

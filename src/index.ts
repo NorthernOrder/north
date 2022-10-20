@@ -64,7 +64,12 @@ async function loadCommands(ctx: Context) {
 
 async function deployCommands(ctx: Context) {
   let deployedCommandsStr = '';
-  const deployedCommandsPath = join(__dirname, '..', 'deployedCommands.json');
+  const deployedCommandsPath = join(
+    __dirname,
+    '..',
+    'data',
+    'deployedCommands.json',
+  );
 
   if (existsSync(deployedCommandsPath)) {
     console.log('Reading deployedCommands.json');
