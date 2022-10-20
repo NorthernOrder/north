@@ -34,7 +34,18 @@ export interface DiscordEvent {
   handler(ctx: Context, ...args: any[]): Promise<void>;
 }
 
-export const event = (e: DiscordEvent) => e;
+export const event = (e: DiscordEvent) => {
+  return {
+    ...e,
+    handler: async (ctx: Context, ...args: any[]) => {
+      try {
+        await e.handler(ctx, ...args);
+      } catch (error) {
+        console.error(`Caught an error from '${e.name}':`, error);
+      }
+    },
+  };
+};
 
 export interface DiscordCommand {
   data: SlashCommandBuilder;
