@@ -77,10 +77,12 @@ export default event({
 
     if (!roleCategory) return;
 
-    const selectedRoles = roleCategory.roles.filter((role) =>
+    const roles = roleCategory.roles.filter((role) => role.selfRole);
+
+    const selectedRoles = roles.filter((role) =>
       interaction.values.includes(snakeCase(role.name)),
     );
-    const unselectedRoles = roleCategory.roles.filter(
+    const unselectedRoles = roles.filter(
       (role) => !selectedRoles.includes(role),
     );
 
