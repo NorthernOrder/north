@@ -615,15 +615,15 @@ const updateSelfRoles: DiscordCommandExecutor = async (ctx, interaction) => {
   );
 
   for (const category of selfRoleCategories) {
+    const roles = category.roles.filter((role) => role.selfRole);
+
     const embed = new EmbedBuilder();
     embed.setTitle(`Assign ${category.name}`);
     embed.setDescription(
-      category.roles
-        .map((role) => `<@&${role.id}> - ${role.description}`)
-        .join('\n'),
+      roles.map((role) => `<@&${role.id}> - ${role.description}`).join('\n'),
     );
 
-    const options = category.roles.map((role) => ({
+    const options = roles.map((role) => ({
       label: role.name,
       value: snakeCase(role.name),
     }));
