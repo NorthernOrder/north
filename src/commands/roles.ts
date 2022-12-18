@@ -570,22 +570,23 @@ const sortRoles: DiscordCommandExecutor = async (ctx, interaction) => {
       const [cutRole] = unmanagedRoles.splice(roleIdx, 1);
       rolesInOrder.push(cutRole!);
     }
-
-    // combination of sorted roles and unmanaged roles in reverse order
-    const allRoles = rolesInOrder.concat(unmanagedRoles).reverse();
-
-    const rolesWithPositions = [];
-    for (let i = roleCount - 1; i >= 0; i--) {
-      // ignore the few first roles that shouldn't be sorted
-      const nthRole = roleCount - i - 1;
-      if (env.NO_SORT_ROLE_COUNT > nthRole) continue;
-
-      // set the position
-      rolesWithPositions.push({ role: allRoles[i]!, position: i + 1 });
-    }
-    // update role positions in discord
-    await roleManager.setPositions(rolesWithPositions);
   }
+
+  // combination of sorted roles and unmanaged roles in reverse order
+  const allRoles = rolesInOrder.concat(unmanagedRoles).reverse();
+
+  const rolesWithPositions = [];
+  for (let i = roleCount - 1; i >= 0; i--) {
+    // ignore the few first roles that shouldn't be sorted
+    const nthRole = roleCount - i - 1;
+    if (env.NO_SORT_ROLE_COUNT > nthRole) continue;
+
+    // set the position
+    rolesWithPositions.push({ role: allRoles[i]!, position: i + 1 });
+  }
+
+  // update role positions in discord
+  await roleManager.setPositions(rolesWithPositions);
 };
 
 /**
