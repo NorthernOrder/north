@@ -9,10 +9,14 @@ import {
 } from 'discord.js';
 import { env } from '../env';
 import {
+  addRoles,
   command,
   DiscordCommandExecutor,
   Permission,
+  removeRoles,
+  roleIdToRoleMention,
   snakeCase,
+  userIdToUserMention,
 } from '../utils';
 
 // TODO: optimize all of the prisma queries, only select fields that are used
@@ -668,6 +672,66 @@ const updateRoles: DiscordCommandExecutor = async (ctx, interaction) => {
 };
 
 /**
+ * Command for giving a role to a member
+ */
+const giveRole: DiscordCommandExecutor = async (ctx, interaction) => {
+  const user = interaction.options.getUser('member')!;
+  const role = interaction.options.getRole('role')!;
+
+  const member = await interaction.guild!.members.fetch(user);
+  const dbRole = await ctx.prisma.role.findUnique({ where: { id: role.id } });
+
+  const added = await addRoles(member, [dbRole!]);
+
+  if (added.length === 0) {
+    await interaction.reply({
+      ephemeral: true,
+      content: `${userIdToUserMention(user.id)} already has the ${
+        role.id
+      } role`,
+    });
+    return;
+  }
+
+  await interaction.reply({
+    ephemeral: true,
+    content: `Added role ${roleIdToRoleMention(
+      role.id,
+    )} to ${userIdToUserMention(user.id)}`,
+  });
+};
+
+/**
+ * Command for taking a role from a member
+ */
+const takeRole: DiscordCommandExecutor = async (ctx, interaction) => {
+  const user = interaction.options.getUser('member')!;
+  const role = interaction.options.getRole('role')!;
+
+  const member = await interaction.guild!.members.fetch(user);
+  const dbRole = await ctx.prisma.role.findUnique({ where: { id: role.id } });
+
+  const removed = await removeRoles(ctx, member, [dbRole!]);
+
+  if (removed.length === 0) {
+    await interaction.reply({
+      ephemeral: true,
+      content: `${userIdToUserMention(user.id)} doesn't have the ${
+        role.id
+      } role`,
+    });
+    return;
+  }
+
+  await interaction.reply({
+    ephemeral: true,
+    content: `Removed role ${roleIdToRoleMention(
+      role.id,
+    )} from ${userIdToUserMention(user.id)}`,
+  });
+};
+
+/**
  * Handles all other `roles` command's subcommands
  */
 const handleOtherCommands: DiscordCommandExecutor = async (
@@ -687,6 +751,10 @@ const handleOtherCommands: DiscordCommandExecutor = async (
       return await listRoles(ctx, interaction);
     case 'update':
       return await updateRoles(ctx, interaction);
+    case 'give':
+      return await giveRole(ctx, interaction);
+    case 'take':
+      return await takeRole(ctx, interaction);
     default:
       return await handleUnknownCommand(ctx, interaction);
   }
@@ -904,6 +972,40 @@ export default command(
             option
               .setName('selfrole')
               .setDescription('Should update selfroles'),
+          ),
+      )
+      .addSubcommand((sub) =>
+        sub
+          .setName('give')
+          .setDescription('Give a role to a member')
+          .addUserOption((option) =>
+            option
+              .setName('member')
+              .setDescription('Member to give the role to')
+              .setRequired(true),
+          )
+          .addRoleOption((option) =>
+            option
+              .setName('role')
+              .setDescription('Role to give to the member')
+              .setRequired(true),
+          ),
+      )
+      .addSubcommand((sub) =>
+        sub
+          .setName('take')
+          .setDescription('Take a role from a member')
+          .addUserOption((option) =>
+            option
+              .setName('member')
+              .setDescription('Member to take the role from')
+              .setRequired(true),
+          )
+          .addRoleOption((option) =>
+            option
+              .setName('role')
+              .setDescription('Role to take from the member')
+              .setRequired(true),
           ),
       ),
   async (ctx, interaction) => {

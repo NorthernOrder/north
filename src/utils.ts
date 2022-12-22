@@ -99,6 +99,7 @@ export const prettyList = (list: any[]) => {
 };
 
 export const roleIdToRoleMention = (id: string) => `<@&${id}>`;
+export const userIdToUserMention = (id: string) => `<@${id}>`;
 
 type RoleCategoryWithRoles = RoleCategory & { roles: Role[] };
 
