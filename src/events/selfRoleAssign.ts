@@ -1,61 +1,23 @@
-import { Role, RoleCategory } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { BaseInteraction, EmbedBuilder, GuildMember } from 'discord.js';
 import {
+  addRoles,
   Context,
   event,
   prettyList,
+  removeRoles,
   roleIdToRoleMention,
   snakeCase,
 } from '../utils';
 
-type RoleCategoryWithRoles = RoleCategory & { roles: Role[] };
-
-const hasAdditionalRolesInCategory = (
+export const updateSelfRoles = async (
+  ctx: Context,
   member: GuildMember,
-  roleCategory: RoleCategoryWithRoles,
-) => {
-  for (const additionalRole of roleCategory!.roles) {
-    if (member.roles.cache.has(additionalRole.id)) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-const updateSelfRoles = async (
-  member: GuildMember,
-  roleCategory: RoleCategoryWithRoles,
   selectedRoles: Role[],
   unselectedRoles: Role[],
 ) => {
-  const removed = new Array<string>();
-  const added = new Array<string>();
-
-  for (const role of unselectedRoles) {
-    if (!member.roles.cache.has(role.id)) continue;
-
-    await member.roles.remove(role.id);
-    removed.push(role.id);
-  }
-
-  for (const role of selectedRoles) {
-    if (member.roles.cache.has(role.id)) continue;
-
-    await member.roles.add(role.id);
-    added.push(role.id);
-  }
-
-  if (!hasAdditionalRolesInCategory(member, roleCategory)) {
-    await member.roles.remove(roleCategory.id);
-  }
-
-  if (
-    hasAdditionalRolesInCategory(member, roleCategory) &&
-    !member.roles.cache.has(roleCategory.id)
-  ) {
-    await member.roles.add(roleCategory.id);
-  }
+  const added = await addRoles(member, selectedRoles);
+  const removed = await removeRoles(ctx, member, unselectedRoles);
 
   return { removed, added };
 };
@@ -89,8 +51,8 @@ export default event({
     const member = interaction.member as GuildMember;
 
     const { removed, added } = await updateSelfRoles(
+      ctx,
       member,
-      roleCategory,
       selectedRoles,
       unselectedRoles,
     );

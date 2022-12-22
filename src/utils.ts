@@ -1,8 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role, RoleCategory } from '@prisma/client';
 import {
   ChatInputCommandInteraction,
   Client,
   Collection,
+  GuildMember,
   SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
   SlashCommandSubcommandsOnlyBuilder,
@@ -98,3 +99,61 @@ export const prettyList = (list: any[]) => {
 };
 
 export const roleIdToRoleMention = (id: string) => `<@&${id}>`;
+
+type RoleCategoryWithRoles = RoleCategory & { roles: Role[] };
+
+const hasAdditionalRolesInCategory = (
+  member: GuildMember,
+  roleCategory: RoleCategoryWithRoles,
+) => {
+  for (const additionalRole of roleCategory!.roles) {
+    if (member.roles.cache.has(additionalRole.id)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+export const addRoles = async (member: GuildMember, roles: Role[]) => {
+  const added = new Array<string>();
+
+  for (const role of roles) {
+    if (!member.roles.cache.has(role.categoryId)) {
+      await member.roles.add(role.categoryId);
+    }
+
+    if (member.roles.cache.has(role.id)) continue;
+
+    await member.roles.add(role.id);
+    added.push(role.id);
+  }
+
+  return added;
+};
+
+export const removeRoles = async (
+  ctx: Context,
+  member: GuildMember,
+  roles: Role[],
+) => {
+  const removed = new Array<string>();
+
+  for (const role of roles) {
+    if (!member.roles.cache.has(role.id)) continue;
+
+    await member.roles.remove(role.id);
+    removed.push(role.id);
+
+    const roleCategory = await ctx.prisma.roleCategory.findUnique({
+      where: { id: role.categoryId },
+      include: { roles: true },
+    });
+
+    if (!hasAdditionalRolesInCategory(member, roleCategory!)) {
+      await member.roles.remove(role.categoryId);
+    }
+  }
+
+  return removed;
+};
