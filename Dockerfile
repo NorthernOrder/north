@@ -1,16 +1,15 @@
 FROM node:16-alpine
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@8.12
 
 WORKDIR /app
 
 ADD package.json .
 ADD pnpm-lock.yaml .
-ADD prisma .
 
 RUN pnpm install
 
-ADD . .
+COPY . .
 
 RUN pnpm build
 

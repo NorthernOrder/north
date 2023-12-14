@@ -2,7 +2,7 @@
 
 ## Feature Parity
 
-### Commands
+### Missing Commands
 
 - poll
 
