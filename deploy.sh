@@ -2,11 +2,11 @@
 
 set -e
 
-export NORTH_BOT_VERSION="v0.4"
+export NORTH_BOT_VERSION="v0.5"
 
 # Build Bot Container
-docker-compose build
+docker compose build
 # Stop Bot if it is running
-docker-compose stop bot
+docker compose stop bot
 # Start Bot
-docker-compose up -d bot
+docker compose up -d bot

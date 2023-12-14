@@ -4,8 +4,8 @@ RUN npm install -g pnpm@8.12
 
 WORKDIR /app
 
-ADD package.json .
-ADD pnpm-lock.yaml .
+COPY package.json .
+COPY pnpm-lock.yaml .
 
 RUN pnpm install
 
