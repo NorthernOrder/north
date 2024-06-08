@@ -1,6 +1,6 @@
-FROM node:16-alpine
+FROM node:20-alpine
 
-RUN npm install -g pnpm@8.12
+RUN npm install -g pnpm@9.2
 
 WORKDIR /app
 
@@ -14,4 +14,3 @@ COPY . .
 RUN pnpm build
 
 CMD ["pnpm", "start"]
-
